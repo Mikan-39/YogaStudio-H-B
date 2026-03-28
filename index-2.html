@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#2D4A3E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="YogaStudio H&B">
+  <link rel="manifest" href="manifest.json">
+  <title>YogaStudio H&B</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sage: #2D4A3E;
+      --sage-light: #4A7A66;
+      --sage-pale: #E8F0EC;
+      --cream: #FAF7F2;
+      --warm: #C4956A;
+      --warm-light: #E8C9A8;
+      --text: #1A2E26;
+      --text-muted: #7A9688;
+      --white: #FFFFFF;
+      --card-bg: #FFFFFF;
+      --shadow: 0 4px 24px rgba(45,74,62,0.10);
+      --shadow-lg: 0 8px 40px rgba(45,74,62,0.15);
+      --radius: 20px;
+      --radius-sm: 12px;
+      --nav-height: 72px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── SPLASH ── */
+    #splash {
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--sage);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    #splash.hide { opacity: 0; transform: scale(1.05); pointer-events: none; }
+    .splash-lotus { font-size: 64px; animation: floatLotus 2s ease-in-out infinite; }
+    .splash-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px; font-weight: 300; color: var(--cream);
+      letter-spacing: 6px;
+    }
+    .splash-sub { font-size: 13px; color: var(--warm-light); letter-spacing: 3px; text-transform: uppercase; }
+    @keyframes floatLotus { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-height);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(45,74,62,0.08);
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 0 8px 8px;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      border: none; background: none; cursor: pointer;
+      transition: all 0.25s ease; flex: 1;
+    }
+    .nav-item .nav-icon { font-size: 22px; transition: transform 0.25s ease; }
+    .nav-item .nav-label { font-size: 10px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.5px; transition: color 0.25s; }
+    .nav-item.active .nav-icon { transform: scale(1.15); }
+    .nav-item.active .nav-label { color: var(--sage); font-weight: 600; }
+    .nav-item.active { background: var(--sage-pale); }
+
+    /* ── PAGES ── */
+    .page { display: none; padding-bottom: calc(var(--nav-height) + 16px); min-height: 100vh; }
+    .page.active { display: block; animation: fadeUp 0.35s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── HOME ── */
+    .home-hero {
+      background: linear-gradient(160deg, var(--sage) 0%, var(--sage-light) 100%);
+      padding: 56px 24px 40px;
+      position: relative; overflow: hidden;
+    }
+    .home-hero::before {
+      content: '🌿';
+      position: absolute; right: -10px; top: 10px;
+      font-size: 120px; opacity: 0.12;
+      transform: rotate(20deg);
+    }
+    .home-greeting { font-size: 13px; color: var(--warm-light); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .home-title { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; color: var(--white); line-height: 1.15; margin-bottom: 4px; }
+    .home-title em { font-style: italic; color: var(--warm-light); }
+    .home-date { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 8px; }
+
+    .home-stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px; padding: 20px 16px 0;
+      margin-top: -20px;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 18px 12px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; color: var(--sage); line-height: 1; }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; letter-spacing: 0.3px; }
+
+    .section { padding: 28px 16px 0; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--text); }
+    .section-link { font-size: 13px; color: var(--sage-light); font-weight: 500; border: none; background: none; cursor: pointer; }
+
+    .today-card {
+      background: linear-gradient(135deg, var(--warm) 0%, #B8814E 100%);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 8px 32px rgba(196,149,106,0.3);
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .today-card:active { transform: scale(0.98); }
+    .today-card-icon { font-size: 40px; }
+    .today-card-text h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--white); margin-bottom: 4px; }
+    .today-card-text p { font-size: 13px; color: rgba(255,255,255,0.8); }
+
+    /* ── CARDS (Blog / Video) ── */
+    .card-list { display: flex; flex-direction: column; gap: 14px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex; gap: 0;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:active { transform: scale(0.98); box-shadow: var(--shadow-lg); }
+    .card-img { width: 100px; min-height: 100px; object-fit: cover; flex-shrink: 0; background: var(--sage-pale); display:flex;align-items:center;justify-content:center;font-size:32px; }
+    .card-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .card-tag { font-size: 10px; font-weight: 600; color: var(--sage-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .card-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 5px; }
+    .card-meta { font-size: 11px; color: var(--text-muted); }
+
+    /* ── VIDEO CARDS ── */
+    .video-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .video-card:active { transform: scale(0.98); }
+    .video-thumb {
+      width: 100%; height: 160px;
+      background: var(--sage);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .video-thumb-emoji { font-size: 48px; }
+    .video-play-btn {
+      position: absolute;
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .video-duration {
+      position: absolute; bottom: 10px; right: 10px;
+      background: rgba(0,0,0,0.65); color: white;
+      font-size: 11px; padding: 3px 8px; border-radius: 6px;
+    }
+    .video-level {
+      position: absolute; top: 10px; left: 10px;
+      font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .level-初級 { background: #D4EDDA; color: #2D7A3E; }
+    .level-中級 { background: #FFF3CD; color: #856404; }
+    .level-上級 { background: #F8D7DA; color: #842029; }
+    .video-card-body { padding: 14px 16px; }
+    .video-card-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .video-card-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* FILTER TABS */
+    .filter-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 4px; scrollbar-width: none; }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab {
+      flex-shrink: 0; padding: 8px 18px;
+      border-radius: 24px; border: 1.5px solid var(--sage-pale);
+      background: var(--white); font-size: 13px; font-weight: 500;
+      color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    }
+    .filter-tab.active { background: var(--sage); color: var(--white); border-color: var(--sage); }
+
+    /* ── QUIZ ── */
+    .quiz-list { display: flex; flex-direction: column; gap: 14px; }
+    .quiz-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      cursor: pointer; transition: transform 0.2s;
+      border-left: 4px solid var(--sage-light);
+    }
+    .quiz-card:active { transform: scale(0.98); }
+    .quiz-q-num { font-size: 11px; color: var(--sage-light); font-weight: 600; letter-spacing: 1px; margin-bottom: 6px; }
+    .quiz-q-text { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 14px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--sage-pale);
+      font-size: 14px; color: var(--text);
+      cursor: pointer; transition: all 0.2s;
+      background: var(--cream);
+    }
+    .quiz-option:hover { border-color: var(--sage-light); background: var(--sage-pale); }
+    .quiz-option.correct { background: #D4EDDA; border-color: #2D7A3E; color: #1A4D26; font-weight: 600; }
+    .quiz-option.wrong { background: #F8D7DA; border-color: #842029; color: #842029; }
+    .quiz-result { text-align: center; margin-top: 12px; font-size: 20px; font-weight: 700; display: none; }
+
+    /* ── PAGE HEADER ── */
+    .page-header { padding: 52px 20px 20px; background: var(--sage); }
+    .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; color: var(--white); }
+    .page-header p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+    /* ── DETAIL VIEW ── */
+    .detail-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: var(--cream); overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+    .detail-overlay.active { display: block; }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    .detail-back {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(250,247,242,0.9); backdrop-filter: blur(10px);
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 10px;
+      border: none; cursor: pointer; width: 100%;
+    }
+    .detail-back span { font-size: 15px; color: var(--sage); font-weight: 500; }
+    .detail-hero-img { width: 100%; height: 220px; object-fit: cover; background: var(--sage-pale); display:flex;align-items:center;justify-content:center;font-size:72px; }
+    .detail-content { padding: 24px 20px 48px; }
+    .detail-tag { font-size: 11px; font-weight: 600; color: var(--sage-light); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+    .detail-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 16px; }
+    .detail-body { font-size: 15px; line-height: 1.8; color: #3A5248; }
+    .detail-video-wrap { background: var(--sage); border-radius: var(--radius); height: 200px; display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:64px; }
+
+    /* ── MY PAGE ── */
+    .mypage-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--sage-light), var(--warm));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin: 0 auto 12px;
+    }
+    .mypage-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; text-align: center; color: var(--text); }
+    .mypage-email { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 4px; }
+    .progress-item { background: var(--white); border-radius: var(--radius-sm); padding: 16px 18px; margin-bottom: 10px; box-shadow: var(--shadow); }
+    .progress-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display:flex;justify-content:space-between; }
+    .progress-bar-wrap { background: var(--sage-pale); border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--sage-light), var(--warm)); transition: width 1s ease; }
+
+    /* scrollable content area */
+    .scroll-content { padding: 16px 16px 0; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen" style="display:none;position:fixed;inset:0;z-index:998;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="font-size:48px;animation:floatLotus 1.2s ease-in-out infinite">🪷</div>
+  <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--sage)">データを読み込み中…</div>
+</div>
+<div id="load-error" style="display:none;position:fixed;bottom:100px;left:16px;right:16px;z-index:997;background:#F8D7DA;border-radius:12px;padding:14px 16px;color:#842029;font-size:13px;text-align:center;">
+  ⚠️ データの読み込みに失敗しました。<br>インターネット接続を確認してください。
+</div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-lotus">🪷</div>
+  <div class="splash-title">YogaStudio H&B</div>
+  <div class="splash-sub">あなたのヨガライフをサポート</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <button class="nav-item active" onclick="showPage('home', this)">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">ホーム</span>
+  </button>
+  <button class="nav-item" onclick="showPage('blog', this)">
+    <span class="nav-icon">📝</span>
+    <span class="nav-label">ブログ</span>
+  </button>
+  <button class="nav-item" onclick="showPage('video', this)">
+    <span class="nav-icon">🎬</span>
+    <span class="nav-label">動画</span>
+  </button>
+  <button class="nav-item" onclick="showPage('quiz', this)">
+    <span class="nav-icon">❓</span>
+    <span class="nav-label">クイズ</span>
+  </button>
+  <button class="nav-item" onclick="showPage('mypage', this)">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">マイページ</span>
+  </button>
+</nav>
+
+<!-- ═══════ HOME ═══════ -->
+<div id="page-home" class="page active">
+  <div class="home-hero">
+    <div class="home-greeting">Good Morning</div>
+    <div class="home-title">今日も<br><em>ヨガを楽しもう</em></div>
+    <div class="home-date" id="today-date"></div>
+  </div>
+  <div class="home-stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-videos">0</div>
+      <div class="stat-label">視聴済み動画</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-quiz">0</div>
+      <div class="stat-label">クイズ正解</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-streak">1</div>
+      <div class="stat-label">連続日数</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">今日のレッスン</div>
+    </div>
+    <div class="today-card" onclick="showPage('video', document.querySelector('[onclick*=video]'))">
+      <div class="today-card-icon">🌅</div>
+      <div class="today-card-text">
+        <h3>朝活！5分間ウォームアップ</h3>
+        <p>初級 · 5分間 · 全身</p>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">最新ブログ</div>
+      <button class="section-link" onclick="showPage('blog', document.querySelector('[onclick*=blog]'))">すべて見る</button>
+    </div>
+    <div class="card-list" id="home-blog-list"></div>
+  </div>
+  <div style="height:16px"></div>
+</div>
+
+<!-- ═══════ BLOG ═══════ -->
+<div id="page-blog" class="page">
+  <div class="page-header">
+    <h1>🪷 ブログ</h1>
+    <p>ヨガの知識を深めよう</p>
+  </div>
+  <div class="scroll-content">
+    <div class="card-list" id="blog-list" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- ═══════ VIDEO ═══════ -->
+<div id="page-video" class="page">
+  <div class="page-header">
+    <h1>🎬 動画レッスン</h1>
+    <p>家でヨガを学ぼう</p>
+  </div>
+  <div style="padding:16px 0 0">
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="filterVideos('all', this)">すべて</div>
+      <div class="filter-tab" onclick="filterVideos('初級', this)">初級</div>
+      <div class="filter-tab" onclick="filterVideos('中級', this)">中級</div>
+      <div class="filter-tab" onclick="filterVideos('上級', this)">上級</div>
+    </div>
+  </div>
+  <div class="scroll-content">
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px" id="video-list"></div>
+  </div>
+</div>
+
+<!-- ═══════ QUIZ ═══════ -->
+<div id="page-quiz" class="page">
+  <div class="page-header">
+    <h1>❓ クイズ</h1>
+    <p>ヨガの知識を確かめよう</p>
+  </div>
+  <div class="scroll-content">
+    <div class="quiz-list" id="quiz-list" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- ═══════ MY PAGE ═══════ -->
+<div id="page-mypage" class="page">
+  <div class="page-header" style="padding-bottom:32px">
+    <div class="mypage-avatar">🧘</div>
+    <div class="mypage-name">YogaStudio H&B ユーザー</div>
+    <div class="mypage-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c4bdabb1b684a1a9a5ada8eaa7aba9">[email&#160;protected]</a></div>
+  </div>
+  <div class="scroll-content" style="margin-top:16px">
+    <div class="section-title" style="margin-bottom:14px">学習進捗</div>
+    <div class="progress-item">
+      <div class="progress-label"><span>動画視聴</span><span id="prog-video-label">0 / 8</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-video-bar" style="width:0%"></div></div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label"><span>クイズ正解率</span><span id="prog-quiz-label">0%</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-quiz-bar" style="width:0%"></div></div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label"><span>ブログ既読</span><span id="prog-blog-label">0 / 5</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-blog-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DETAIL OVERLAY ═══════ -->
+<div id="detail-overlay" class="detail-overlay">
+  <button class="detail-back" onclick="closeDetail()">
+    <span>← 戻る</span>
+  </button>
+  <div id="detail-inner"></div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ─────────── DATA ───────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxcvpVPCmJyVbsZnkHFE2yuRHUUb9ch5U0qQ3mH8nuo7Ewg-jOOApAdJkn_lFFpO0z1WQ/exec?t=' + Date.now();
+
+let blogs = [];
+let videos = [];
+let quizzes = [];
+
+// 絵文字マッピング（スプレッドシートにemoji列がない場合のデフォルト）
+const blogEmojis = ['🌅','💆','🫧','☀️','🌙','🧘','🌿','💫'];
+const videoEmojis = ['🧘','🌅','💆','☀️','💪','🦵','🤸','🌙'];
+
+async function loadData() {
+  try {
+    showLoading(true);
+    const res = await fetch(GAS_URL);
+    const data = await res.json();
+
+    // ブログデータを変換
+    blogs = data.blogs.map((b, i) => ({
+      id: i + 1,
+      title: b['タイトル'] || '',
+      category: b['カテゴリ'] || '',
+      body: b['本文'] || '',
+      emoji: blogEmojis[i % blogEmojis.length],
+      date: b['公開日'] ? String(b['公開日']).slice(0,10).replace(/-/g,'.') : '',
+      tag: b['タグ'] || '',
+    }));
+
+    // 動画データを変換
+    videos = data.videos.map((v, i) => ({
+      id: i + 1,
+      title: v['タイトル'] || '',
+      level: v['レベル'] || '初級',
+      body: v['部位'] || '',
+      duration: v['時間（分）'] || 0,
+      emoji: videoEmojis[i % videoEmojis.length],
+      desc: v['説明'] || '',
+      url: v['YouTubeURL'] || '',
+    }));
+
+    // クイズデータを変換
+    quizzes = data.quizzes.map((q, i) => {
+      const opts = [q['選択肢A'], q['選択肢B'], q['選択肢C'], q['選択肢D']];
+      const ansMap = { A:0, B:1, C:2, D:3 };
+      return {
+        id: i + 1,
+        q: q['問題文'] || '',
+        opts: opts,
+        ans: ansMap[q['正解']] ?? 0,
+      };
+    });
+
+    showLoading(false);
+    renderHome(); renderBlog(); renderVideos(); renderQuiz(); renderMyPage();
+  } catch (e) {
+    showLoading(false);
+    document.getElementById('load-error').style.display = 'block';
+    console.error('データ読み込みエラー:', e);
+  }
+}
+
+function showLoading(show) {
+  document.getElementById('loading-screen').style.display = show ? 'flex' : 'none';
+}
+
+// ─────────── STATE ───────────
+const state = {
+  watchedVideos: JSON.parse(localStorage.getItem('watchedVideos') || '[]'),
+  quizCorrect: JSON.parse(localStorage.getItem('quizCorrect') || '[]'),
+  readBlogs: JSON.parse(localStorage.getItem('readBlogs') || '[]'),
+};
+function saveState() {
+  localStorage.setItem('watchedVideos', JSON.stringify(state.watchedVideos));
+  localStorage.setItem('quizCorrect', JSON.stringify(state.quizCorrect));
+  localStorage.setItem('readBlogs', JSON.stringify(state.readBlogs));
+}
+
+// ─────────── RENDER ───────────
+function renderHome() {
+  document.getElementById('stat-videos').textContent = state.watchedVideos.length;
+  document.getElementById('stat-quiz').textContent = state.quizCorrect.length;
+  const list = document.getElementById('home-blog-list');
+  list.innerHTML = blogs.slice(0,2).map(b => blogCardHTML(b)).join('');
+}
+
+function blogCardHTML(b) {
+  return `<div class="card" onclick="openDetail('blog',${b.id})">
+    <div class="card-img">${b.emoji}</div>
+    <div class="card-body">
+      <div class="card-tag">${b.category}</div>
+      <div class="card-title">${b.title}</div>
+      <div class="card-meta">${b.date} · ${b.tag}</div>
+    </div>
+  </div>`;
+}
+
+function renderBlog() {
+  document.getElementById('blog-list').innerHTML = blogs.map(b => blogCardHTML(b)).join('');
+}
+
+function renderVideos(filter='all') {
+  const filtered = filter === 'all' ? videos : videos.filter(v => v.level === filter);
+  document.getElementById('video-list').innerHTML = filtered.map(v => `
+    <div class="video-card" onclick="openDetail('video',${v.id})">
+      <div class="video-thumb">
+        <div class="video-thumb-emoji">${v.emoji}</div>
+        <div class="video-play-btn">▶️</div>
+        <div class="video-duration">${v.duration}分</div>
+        <div class="video-level level-${v.level}">${v.level}</div>
+      </div>
+      <div class="video-card-body">
+        <div class="video-card-title">${v.title}</div>
+        <div class="video-card-sub">${v.body} · ${v.duration}分</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterVideos(level, el) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderVideos(level);
+}
+
+function renderQuiz() {
+  document.getElementById('quiz-list').innerHTML = quizzes.map((q,i) => `
+    <div class="quiz-card" id="quiz-card-${q.id}">
+      <div class="quiz-q-num">Q${i+1} / ${quizzes.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((o,j) => `<div class="quiz-option" onclick="answerQuiz(${q.id},${j},${q.ans},this)">${['A','B','C','D'][j]}. ${o}</div>`).join('')}
+      </div>
+      <div class="quiz-result" id="qr-${q.id}"></div>
+    </div>`).join('');
+}
+
+function answerQuiz(qid, chosen, ans, el) {
+  const card = document.getElementById('quiz-card-'+qid);
+  const opts = card.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  const result = document.getElementById('qr-'+qid);
+  if (chosen === ans) {
+    el.classList.add('correct');
+    result.textContent = '⭕️ 正解！素晴らしい！';
+    result.style.color = '#2D7A3E';
+    if (!state.quizCorrect.includes(qid)) { state.quizCorrect.push(qid); saveState(); }
+  } else {
+    el.classList.add('wrong');
+    opts[ans].classList.add('correct');
+    result.textContent = '❌ 不正解…正解は ' + ['A','B','C','D'][ans] + ' です';
+    result.style.color = '#842029';
+  }
+  result.style.display = 'block';
+  updateMyPage();
+}
+
+function renderMyPage() {
+  const vPct = Math.round(state.watchedVideos.length / videos.length * 100);
+  const qPct = Math.round(state.quizCorrect.length / quizzes.length * 100);
+  const bPct = Math.round(state.readBlogs.length / blogs.length * 100);
+  document.getElementById('prog-video-label').textContent = `${state.watchedVideos.length} / ${videos.length}`;
+  document.getElementById('prog-video-bar').style.width = vPct + '%';
+  document.getElementById('prog-quiz-label').textContent = qPct + '%';
+  document.getElementById('prog-quiz-bar').style.width = qPct + '%';
+  document.getElementById('prog-blog-label').textContent = `${state.readBlogs.length} / ${blogs.length}`;
+  document.getElementById('prog-blog-bar').style.width = bPct + '%';
+}
+function updateMyPage() { renderMyPage(); renderHome(); }
+
+// ─────────── DETAIL ───────────
+function openDetail(type, id) {
+  const overlay = document.getElementById('detail-overlay');
+  const inner = document.getElementById('detail-inner');
+  if (type === 'blog') {
+    const b = blogs.find(x => x.id === id);
+    if (!state.readBlogs.includes(id)) { state.readBlogs.push(id); saveState(); updateMyPage(); }
+    inner.innerHTML = `
+      <div class="detail-hero-img">${b.emoji}</div>
+      <div class="detail-content">
+        <div class="detail-tag">${b.category} · ${b.date}</div>
+        <div class="detail-title">${b.title}</div>
+        <div class="detail-body">${b.body}</div>
+      </div>`;
+  } else {
+    const v = videos.find(x => x.id === id);
+    if (!state.watchedVideos.includes(id)) { state.watchedVideos.push(id); saveState(); updateMyPage(); }
+    inner.innerHTML = `
+      <div class="detail-video-wrap">${v.emoji}</div>
+      <div class="detail-content">
+        <div class="detail-tag">${v.level} · ${v.body} · ${v.duration}分</div>
+        <div class="detail-title">${v.title}</div>
+        <div class="detail-body">${v.desc}<br><br>
+          <div style="background:var(--sage-pale);border-radius:12px;padding:14px;text-align:center;margin-top:12px">
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">YouTubeでレッスンを見る</div>
+            <div style="font-size:28px">▶️</div>
+            <div style="font-size:12px;color:var(--sage-light);margin-top:4px">${v.url ? `<a href="${v.url}" target="_blank" style="color:var(--sage);font-weight:600">YouTubeで開く →</a>` : 'URLをスプレッドシートに設定してください'}</div>
+          </div>
+        </div>
+      </div>`;
+  }
+  overlay.classList.add('active');
+}
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('active');
+}
+
+// ─────────── NAV ───────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'mypage') renderMyPage();
+}
+
+// ─────────── INIT ───────────
+window.addEventListener('load', () => {
+  const now = new Date();
+  document.getElementById('today-date').textContent =
+    now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日';
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    loadData();
+  }, 1800);
+});
